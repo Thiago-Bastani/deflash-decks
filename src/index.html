@@ -29,6 +29,11 @@
             </a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="#" data-page="financas">
+              <i class="bi bi-wallet2"></i> Finanças
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="#" data-page="configuracoes">
               <i class="bi bi-gear"></i> Configurações
             </a>
@@ -208,6 +213,123 @@
         </div>
       </div>
 
+      <!-- Página Finanças -->
+      <div class="page d-none" id="page-financas">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+          <div>
+            <h2><i class="bi bi-wallet2"></i> Planejamento Financeiro</h2>
+            <p class="subtitle mb-0">Compare seu planejamento com a realidade.</p>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" id="btnExportFinancas">
+              <i class="bi bi-download"></i> Exportar
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" id="btnImportFinancas">
+              <i class="bi bi-upload"></i> Importar
+            </button>
+            <input type="file" id="importFinancasInput" accept=".json" style="display: none;">
+          </div>
+        </div>
+
+        <!-- Seção Superior: Lançamentos e Planejamento -->
+        <div class="financas-top row g-3 mt-3">
+          <!-- Coluna Esquerda: Lançamentos Reais -->
+          <div class="col-12 col-lg-6">
+            <div class="card h-100">
+              <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-cash-stack text-success"></i> Lançamentos Reais</h5>
+              </div>
+              <div class="card-body">
+                <!-- Formulário -->
+                <div class="row g-2 mb-2">
+                  <div class="col-4">
+                    <input type="number" class="form-control" id="lancamento-valor" placeholder="Valor" step="0.01" min="0">
+                  </div>
+                  <div class="col-4">
+                    <select class="form-select" id="lancamento-tipo">
+                      <option value="entrada">Entrada</option>
+                      <option value="saida">Saída</option>
+                      <option value="save">Save</option>
+                    </select>
+                  </div>
+                  <div class="col-4">
+                    <input type="text" class="form-control" id="lancamento-nome" placeholder="Nome">
+                  </div>
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-8">
+                    <input type="date" class="form-control" id="lancamento-data">
+                  </div>
+                  <div class="col-4">
+                    <button class="btn btn-minimal w-100" id="btnAddLancamento">
+                      <i class="bi bi-plus"></i> Add
+                    </button>
+                  </div>
+                </div>
+                <!-- Lista de Lançamentos -->
+                <div id="lancamentos-lista" class="financas-lista"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna Direita: Planejamento -->
+          <div class="col-12 col-lg-6">
+            <div class="card h-100">
+              <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clipboard-data text-primary"></i> Planejamento</h5>
+              </div>
+              <div class="card-body">
+                <!-- Formulário -->
+                <div class="row g-2 mb-2">
+                  <div class="col-4">
+                    <input type="number" class="form-control" id="plan-valor" placeholder="Valor" step="0.01" min="0">
+                  </div>
+                  <div class="col-4">
+                    <select class="form-select" id="plan-tipo">
+                      <option value="entrada">Entrada</option>
+                      <option value="saida">Saída</option>
+                      <option value="save">Save</option>
+                    </select>
+                  </div>
+                  <div class="col-4">
+                    <input type="text" class="form-control" id="plan-nome" placeholder="Nome">
+                  </div>
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-8">
+                    <input type="date" class="form-control" id="plan-data">
+                  </div>
+                  <div class="col-4">
+                    <button class="btn btn-minimal w-100" id="btnAddPlanejamento">
+                      <i class="bi bi-plus"></i> Add
+                    </button>
+                  </div>
+                </div>
+                <!-- Lista de Planejamento -->
+                <div id="planejamento-lista" class="financas-lista"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção Inferior: Indicadores -->
+        <div class="financas-bottom mt-4">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h5 class="mb-0"><i class="bi bi-graph-up"></i> Indicadores</h5>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <label class="form-label mb-0 small">De:</label>
+              <input type="date" class="form-control form-control-sm" id="filtro-data-inicio" style="width: auto;">
+              <label class="form-label mb-0 small">Até:</label>
+              <input type="date" class="form-control form-control-sm" id="filtro-data-fim" style="width: auto;">
+              <button class="btn btn-minimal btn-sm" id="btnFiltrarIndicadores">
+                <i class="bi bi-funnel"></i> Filtrar
+              </button>
+            </div>
+          </div>
+          <div class="row g-3" id="indicadores-container"></div>
+        </div>
+      </div>
+
       <!-- Página Configurações -->
       <div class="page d-none" id="page-configuracoes">
         <h2><i class="bi bi-gear"></i> Configurações</h2>
@@ -348,6 +470,24 @@
 
   <!-- Input oculto para importação -->
   <input type="file" id="importFileInput" accept=".json" style="display: none;">
+
+  <!-- Modal de Aviso/Erro -->
+  <div class="modal fade" id="modalAviso" tabindex="-1" aria-labelledby="modalAvisoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="modalAvisoLabel">Aviso</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p id="modalAvisoMensagem" class="mb-0"></p>
+        </div>
+        <div class="modal-footer border-0 justify-content-center">
+          <button type="button" class="btn btn-minimal" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Resultado Importação -->
   <div class="modal fade" id="modalImportResult" tabindex="-1" aria-labelledby="modalImportResultLabel" aria-hidden="true">

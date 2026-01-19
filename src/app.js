@@ -808,7 +808,7 @@ function saveCard() {
   const back = document.getElementById('card-back').value.trim();
 
   if (!front || !back) {
-    alert('Preencha a frente e a traseira da carta.');
+    showAviso('Preencha a frente e a traseira da carta.');
     return;
   }
 
@@ -1052,6 +1052,363 @@ function showImportResult(type, errorMessage, imported, duplicates, total) {
   modal.show();
 }
 
+// ==================== MODAL DE AVISO ====================
+
+// Exibe modal de aviso (substitui alert)
+function showAviso(mensagem) {
+  const modalEl = document.getElementById('modalAviso');
+  const mensagemEl = document.getElementById('modalAvisoMensagem');
+
+  if (modalEl && mensagemEl) {
+    mensagemEl.textContent = mensagem;
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+}
+
+// ==================== FINANÇAS ====================
+
+// Carrega dados financeiros do localStorage
+function loadFinancas() {
+  const saved = localStorage.getItem('financas');
+  if (saved) {
+    return JSON.parse(saved);
+  }
+  return {
+    lancamentos: [],
+    planejamento: []
+  };
+}
+
+// Salva dados financeiros no localStorage
+function saveFinancas(data) {
+  localStorage.setItem('financas', JSON.stringify(data));
+}
+
+// Gera ID único para item financeiro
+function generateFinancaId() {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
+
+// Adiciona lançamento real
+function addLancamento(tipo, nome, valor, data) {
+  const financas = loadFinancas();
+  financas.lancamentos.push({
+    id: generateFinancaId(),
+    tipo,
+    nome: nome.trim(),
+    valor: parseFloat(valor),
+    data
+  });
+  saveFinancas(financas);
+  renderFinancas();
+}
+
+// Adiciona planejamento
+function addPlanejamento(tipo, nome, valor, data) {
+  const financas = loadFinancas();
+  financas.planejamento.push({
+    id: generateFinancaId(),
+    tipo,
+    nome: nome.trim(),
+    valor: parseFloat(valor),
+    data
+  });
+  saveFinancas(financas);
+  renderFinancas();
+}
+
+// Remove lançamento
+function deleteLancamento(id) {
+  const financas = loadFinancas();
+  financas.lancamentos = financas.lancamentos.filter(l => l.id !== id);
+  saveFinancas(financas);
+  renderFinancas();
+}
+
+// Remove planejamento
+function deletePlanejamento(id) {
+  const financas = loadFinancas();
+  financas.planejamento = financas.planejamento.filter(p => p.id !== id);
+  saveFinancas(financas);
+  renderFinancas();
+}
+
+// Calcula indicadores financeiros com filtro de data
+function calcularIndicadores(dataInicio, dataFim) {
+  const financas = loadFinancas();
+
+  const filtrarPorData = (items) => {
+    if (!dataInicio && !dataFim) return items;
+    return items.filter(item => {
+      const itemData = item.data;
+      if (dataInicio && itemData < dataInicio) return false;
+      if (dataFim && itemData > dataFim) return false;
+      return true;
+    });
+  };
+
+  const calcular = (items) => {
+    const filtrados = filtrarPorData(items);
+    let entradas = 0, saidas = 0, saves = 0;
+    filtrados.forEach(item => {
+      if (item.tipo === 'entrada') entradas += item.valor;
+      else if (item.tipo === 'saida') saidas += item.valor;
+      else if (item.tipo === 'save') saves += item.valor;
+    });
+    return { entradas, saidas, saves, saldo: entradas - saidas - saves };
+  };
+
+  return {
+    real: calcular(financas.lancamentos),
+    planejado: calcular(financas.planejamento)
+  };
+}
+
+// ==================== EXPORT/IMPORT FINANÇAS ====================
+
+// Exporta dados financeiros para JSON
+function exportFinancas() {
+  const financas = loadFinancas();
+
+  const exportData = {
+    exportedAt: new Date().toISOString(),
+    type: 'deflash-financas',
+    lancamentos: financas.lancamentos,
+    planejamento: financas.planejamento
+  };
+
+  const jsonString = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `financas_${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Importa dados financeiros de JSON
+function importFinancas(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importData = JSON.parse(e.target.result);
+
+      // Valida estrutura
+      if (importData.type !== 'deflash-financas' ||
+          !Array.isArray(importData.lancamentos) ||
+          !Array.isArray(importData.planejamento)) {
+        showAviso('Arquivo inválido. Use um arquivo exportado pelo Deflash.');
+        return;
+      }
+
+      const financas = loadFinancas();
+
+      // Função para verificar duplicatas por hash do conteúdo
+      const getItemHash = (item) => md5(item.tipo + item.nome + item.valor + item.data);
+
+      // Importa lançamentos
+      const existingLancHashes = new Set(financas.lancamentos.map(getItemHash));
+      let lancImportados = 0;
+      importData.lancamentos.forEach(item => {
+        if (!existingLancHashes.has(getItemHash(item))) {
+          financas.lancamentos.push({
+            id: generateFinancaId(),
+            tipo: item.tipo,
+            nome: item.nome,
+            valor: item.valor,
+            data: item.data
+          });
+          existingLancHashes.add(getItemHash(item));
+          lancImportados++;
+        }
+      });
+
+      // Importa planejamento
+      const existingPlanHashes = new Set(financas.planejamento.map(getItemHash));
+      let planImportados = 0;
+      importData.planejamento.forEach(item => {
+        if (!existingPlanHashes.has(getItemHash(item))) {
+          financas.planejamento.push({
+            id: generateFinancaId(),
+            tipo: item.tipo,
+            nome: item.nome,
+            valor: item.valor,
+            data: item.data
+          });
+          existingPlanHashes.add(getItemHash(item));
+          planImportados++;
+        }
+      });
+
+      saveFinancas(financas);
+      renderFinancas();
+
+      showImportFinancasResult(lancImportados, planImportados,
+        importData.lancamentos.length, importData.planejamento.length);
+
+    } catch (err) {
+      showAviso('Erro ao ler arquivo: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Mostra resultado da importação de finanças
+function showImportFinancasResult(lancImportados, planImportados, totalLanc, totalPlan) {
+  const content = document.getElementById('importResultContent');
+  content.innerHTML = `
+    <div class="text-center">
+      <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+      <h5 class="mt-3">Importação Concluída</h5>
+    </div>
+    <div class="mt-3">
+      <p class="mb-2"><strong>Lançamentos:</strong></p>
+      <p class="mb-1 text-success"><i class="bi bi-plus-circle me-2"></i>Importados: ${lancImportados} de ${totalLanc}</p>
+      <p class="mb-2 text-muted"><i class="bi bi-copy me-2"></i>Duplicados ignorados: ${totalLanc - lancImportados}</p>
+      <p class="mb-2"><strong>Planejamento:</strong></p>
+      <p class="mb-1 text-success"><i class="bi bi-plus-circle me-2"></i>Importados: ${planImportados} de ${totalPlan}</p>
+      <p class="mb-0 text-muted"><i class="bi bi-copy me-2"></i>Duplicados ignorados: ${totalPlan - planImportados}</p>
+    </div>
+  `;
+  const modal = new bootstrap.Modal(document.getElementById('modalImportResult'));
+  modal.show();
+}
+
+// Renderiza lista de itens financeiros agrupada por tipo
+function renderListaFinancas(containerId, items, tipo) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const entradas = items.filter(i => i.tipo === 'entrada').sort((a, b) => new Date(b.data) - new Date(a.data));
+  const saidas = items.filter(i => i.tipo === 'saida').sort((a, b) => new Date(b.data) - new Date(a.data));
+  const saves = items.filter(i => i.tipo === 'save').sort((a, b) => new Date(b.data) - new Date(a.data));
+
+  const deleteFunc = tipo === 'lancamento' ? 'deleteLancamento' : 'deletePlanejamento';
+
+  const renderGrupo = (titulo, lista, corTexto, corBg) => {
+    if (lista.length === 0) return '';
+    return `
+      <div class="financas-grupo">
+        <h6 class="${corTexto}"><i class="bi bi-chevron-down"></i> ${titulo}</h6>
+        ${lista.map(item => `
+          <div class="financas-item d-flex justify-content-between align-items-center">
+            <div class="item-nome">
+              ${escapeHtml(item.nome)}
+              <span class="item-data text-muted d-block">${formatarDataFinanca(item.data)}</span>
+            </div>
+            <div class="item-valor ${corTexto}">
+              R$ ${item.valor.toFixed(2)}
+              <button class="btn btn-link btn-sm text-danger p-0 ms-2" onclick="${deleteFunc}('${item.id}')" title="Excluir">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  };
+
+  container.innerHTML =
+    renderGrupo('Entradas', entradas, 'text-success') +
+    renderGrupo('Saídas', saidas, 'text-danger') +
+    renderGrupo('Investimento/Save', saves, 'text-primary');
+
+  if (items.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center small">Nenhum registro.</p>';
+  }
+}
+
+// Formata data para exibição em finanças
+function formatarDataFinanca(dataStr) {
+  const data = new Date(dataStr + 'T00:00:00');
+  return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+// Renderiza indicadores
+function renderIndicadores(ind) {
+  const container = document.getElementById('indicadores-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="col-6 col-md-3">
+      <div class="card indicador-card">
+        <div class="card-body text-center">
+          <small class="text-muted">Saldo Real</small>
+          <h4 class="${ind.real.saldo >= 0 ? 'text-success' : 'text-danger'}">
+            R$ ${ind.real.saldo.toFixed(2)}
+          </h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card indicador-card">
+        <div class="card-body text-center">
+          <small class="text-muted">Saldo Planejado</small>
+          <h4 class="${ind.planejado.saldo >= 0 ? 'text-success' : 'text-danger'}">
+            R$ ${ind.planejado.saldo.toFixed(2)}
+          </h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card indicador-card">
+        <div class="card-body text-center">
+          <small class="text-muted">Guardado (Real)</small>
+          <h4 class="text-primary">R$ ${ind.real.saves.toFixed(2)}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card indicador-card">
+        <div class="card-body text-center">
+          <small class="text-muted">Guardado (Plan.)</small>
+          <h4 class="text-primary">R$ ${ind.planejado.saves.toFixed(2)}</h4>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Renderiza página de finanças completa
+function renderFinancas() {
+  const financas = loadFinancas();
+
+  // Obtém filtros de data
+  const dataInicio = document.getElementById('filtro-data-inicio')?.value || null;
+  const dataFim = document.getElementById('filtro-data-fim')?.value || null;
+
+  const indicadores = calcularIndicadores(dataInicio, dataFim);
+
+  // Renderiza lançamentos reais
+  renderListaFinancas('lancamentos-lista', financas.lancamentos, 'lancamento');
+
+  // Renderiza planejamento
+  renderListaFinancas('planejamento-lista', financas.planejamento, 'planejamento');
+
+  // Renderiza indicadores
+  renderIndicadores(indicadores);
+}
+
+// Inicializa filtros de data com mês atual
+function initFiltrosData() {
+  const hoje = new Date();
+  const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+  const formatDate = (d) => d.toISOString().split('T')[0];
+
+  const filtroInicio = document.getElementById('filtro-data-inicio');
+  const filtroFim = document.getElementById('filtro-data-fim');
+
+  if (filtroInicio) filtroInicio.value = formatDate(primeiroDia);
+  if (filtroFim) filtroFim.value = formatDate(ultimoDia);
+}
+
 // ==================== INICIALIZAÇÃO ====================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1069,6 +1426,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (targetPage === 'decks') {
         renderDecks();
+      }
+
+      if (targetPage === 'financas') {
+        initFiltrosData();
+        renderFinancas();
       }
 
       // Fecha o menu mobile se estiver aberto
@@ -1133,7 +1495,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = nameInput.value.trim();
 
       if (!name) {
-        alert('Digite um nome para o deck.');
+        showAviso('Digite um nome para o deck.');
         return;
       }
 
@@ -1157,7 +1519,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const newName = document.getElementById('newDeckName').value.trim();
 
       if (!newName) {
-        alert('Digite um nome para o deck.');
+        showAviso('Digite um nome para o deck.');
         return;
       }
 
@@ -1213,6 +1575,98 @@ document.addEventListener('DOMContentLoaded', () => {
         processImportFile(file);
       }
     });
+  }
+
+  // ==================== EVENT LISTENERS FINANÇAS ====================
+
+  // Botão adicionar lançamento
+  const btnAddLancamento = document.getElementById('btnAddLancamento');
+  if (btnAddLancamento) {
+    btnAddLancamento.addEventListener('click', () => {
+      const valor = document.getElementById('lancamento-valor').value;
+      const tipo = document.getElementById('lancamento-tipo').value;
+      const nome = document.getElementById('lancamento-nome').value;
+      const data = document.getElementById('lancamento-data').value;
+
+      if (!valor || !nome || !data) {
+        showAviso('Preencha todos os campos.');
+        return;
+      }
+
+      if (parseFloat(valor) <= 0) {
+        showAviso('O valor deve ser maior que zero.');
+        return;
+      }
+
+      addLancamento(tipo, nome, valor, data);
+
+      // Limpa formulário
+      document.getElementById('lancamento-valor').value = '';
+      document.getElementById('lancamento-nome').value = '';
+    });
+  }
+
+  // Botão adicionar planejamento
+  const btnAddPlanejamento = document.getElementById('btnAddPlanejamento');
+  if (btnAddPlanejamento) {
+    btnAddPlanejamento.addEventListener('click', () => {
+      const valor = document.getElementById('plan-valor').value;
+      const tipo = document.getElementById('plan-tipo').value;
+      const nome = document.getElementById('plan-nome').value;
+      const data = document.getElementById('plan-data').value;
+
+      if (!valor || !nome || !data) {
+        showAviso('Preencha todos os campos.');
+        return;
+      }
+
+      if (parseFloat(valor) <= 0) {
+        showAviso('O valor deve ser maior que zero.');
+        return;
+      }
+
+      addPlanejamento(tipo, nome, valor, data);
+
+      // Limpa formulário
+      document.getElementById('plan-valor').value = '';
+      document.getElementById('plan-nome').value = '';
+    });
+  }
+
+  // Define data de hoje como padrão nos calendários de finanças
+  const hoje = new Date().toISOString().split('T')[0];
+  const lancamentoData = document.getElementById('lancamento-data');
+  const planData = document.getElementById('plan-data');
+  if (lancamentoData) lancamentoData.value = hoje;
+  if (planData) planData.value = hoje;
+
+  // Botão exportar finanças
+  const btnExportFinancas = document.getElementById('btnExportFinancas');
+  if (btnExportFinancas) {
+    btnExportFinancas.addEventListener('click', exportFinancas);
+  }
+
+  // Botão importar finanças
+  const btnImportFinancas = document.getElementById('btnImportFinancas');
+  const importFinancasInput = document.getElementById('importFinancasInput');
+  if (btnImportFinancas && importFinancasInput) {
+    btnImportFinancas.addEventListener('click', () => {
+      importFinancasInput.value = '';
+      importFinancasInput.click();
+    });
+
+    importFinancasInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        importFinancas(file);
+      }
+    });
+  }
+
+  // Botão filtrar indicadores
+  const btnFiltrarIndicadores = document.getElementById('btnFiltrarIndicadores');
+  if (btnFiltrarIndicadores) {
+    btnFiltrarIndicadores.addEventListener('click', renderFinancas);
   }
 
   // Salvar carta

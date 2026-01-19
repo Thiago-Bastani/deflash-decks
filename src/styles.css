@@ -604,6 +604,104 @@ body.dark-mode .btn-easy:hover {
   color: white;
 }
 
+/* ==================== PÁGINA FINANÇAS ==================== */
+
+.financas-top {
+  min-height: 350px;
+}
+
+.financas-top .card-header {
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+}
+
+.financas-top .card-header h5 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.financas-lista {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.financas-grupo {
+  margin-bottom: 1rem;
+}
+
+.financas-grupo h6 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.financas-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+}
+
+.financas-item:last-child {
+  border-bottom: none;
+}
+
+.financas-item .item-nome {
+  flex: 1;
+}
+
+.financas-item .item-data {
+  font-size: 0.75rem;
+}
+
+.financas-item .item-valor {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.indicador-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.indicador-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.indicador-card .card-body {
+  padding: 1rem;
+}
+
+.indicador-card h4 {
+  margin: 0.5rem 0 0 0;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.indicador-card small {
+  font-size: 0.8rem;
+}
+
+/* Dark mode - Finanças */
+body.dark-mode .financas-top .card-header {
+  background-color: var(--bg-secondary);
+  border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .financas-grupo h6 {
+  border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .financas-item {
+  border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .indicador-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   h2 {
