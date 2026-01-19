@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deflash Decks</title>
+  <!-- Bootstrap CSS (local) -->
+  <link href="lib/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons (local) -->
+  <link href="lib/bootstrap-icons.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navbar / Menu no Topo -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#" id="navBrand">
+        <i class="bi bi-lightning-charge"></i> Deflash Decks
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <i class="bi bi-list"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" data-page="decks">
+              <i class="bi bi-collection"></i> Decks
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-page="configuracoes">
+              <i class="bi bi-gear"></i> Configurações
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Conteúdo Principal -->
+  <main class="container mt-4">
+    <div id="content">
+      <!-- Página Decks -->
+      <div class="page" id="page-decks">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h2><i class="bi bi-collection"></i> Decks</h2>
+            <p class="subtitle mb-0">Gerencie seus decks aqui.</p>
+          </div>
+          <button class="btn btn-minimal" id="btnNovoDeck" data-bs-toggle="modal" data-bs-target="#modalNovoDeck">
+            <i class="bi bi-plus"></i> Novo Deck
+          </button>
+        </div>
+
+        <!-- Lista de Decks -->
+        <div id="decks-container" class="row g-3">
+          <!-- Decks serão renderizados aqui via JavaScript -->
+        </div>
+
+        <!-- Mensagem quando não há decks -->
+        <div id="empty-decks" class="card d-none">
+          <div class="card-body text-center">
+            <p class="empty-text mb-0">Nenhum deck criado ainda.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Página de Revisão -->
+      <div class="page d-none" id="page-review">
+        <div class="d-flex align-items-center mb-3">
+          <button class="btn btn-link p-0 me-3" id="btnVoltarReview">
+            <i class="bi bi-arrow-left fs-4"></i>
+          </button>
+          <div class="flex-grow-1">
+            <h2 id="review-deck-name" class="mb-0"><i class="bi bi-play-circle"></i> <span></span></h2>
+            <p class="subtitle mb-0" id="review-progress">0 de 0 cartas</p>
+          </div>
+        </div>
+
+        <!-- Container de Revisão -->
+        <div id="review-container">
+          <!-- Card de Revisão -->
+          <div class="review-card-wrapper">
+            <div class="card review-card" id="review-card">
+              <div class="card-body text-center">
+                <div id="review-front" class="review-content">
+                  <p class="review-text"></p>
+                </div>
+                <div id="review-back" class="review-content d-none">
+                  <hr class="my-3">
+                  <p class="review-text text-muted"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botão Mostrar Resposta -->
+          <div id="show-answer-container" class="text-center mt-4">
+            <button class="btn btn-minimal btn-lg" id="btnShowAnswer">
+              <i class="bi bi-eye"></i> Mostrar Resposta
+            </button>
+          </div>
+
+          <!-- Botões de Dificuldade -->
+          <div id="difficulty-buttons" class="d-none mt-4">
+            <div class="row g-2 justify-content-center">
+              <div class="col-6 col-md-3">
+                <button class="btn btn-difficulty btn-again w-100" data-difficulty="again">
+                  <i class="bi bi-arrow-repeat"></i><br>
+                  <span class="btn-label">Repetir</span>
+                  <small class="btn-interval">1 min</small>
+                </button>
+              </div>
+              <div class="col-6 col-md-3">
+                <button class="btn btn-difficulty btn-hard w-100" data-difficulty="hard">
+                  <i class="bi bi-emoji-frown"></i><br>
+                  <span class="btn-label">Difícil</span>
+                  <small class="btn-interval">5 min</small>
+                </button>
+              </div>
+              <div class="col-6 col-md-3">
+                <button class="btn btn-difficulty btn-medium w-100" data-difficulty="medium">
+                  <i class="bi bi-emoji-neutral"></i><br>
+                  <span class="btn-label">Médio</span>
+                  <small class="btn-interval">10 min</small>
+                </button>
+              </div>
+              <div class="col-6 col-md-3">
+                <button class="btn btn-difficulty btn-easy w-100" data-difficulty="easy">
+                  <i class="bi bi-emoji-smile"></i><br>
+                  <span class="btn-label">Fácil</span>
+                  <small class="btn-interval" id="easy-interval">1 dia</small>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensagem de Revisão Completa -->
+        <div id="review-complete" class="d-none text-center py-5">
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+          <h3 class="mt-3">Revisão Completa!</h3>
+          <p class="text-muted">Você revisou todas as cartas disponíveis.</p>
+          <button class="btn btn-minimal mt-3" id="btnVoltarAposRevisao">
+            <i class="bi bi-arrow-left"></i> Voltar aos Decks
+          </button>
+        </div>
+
+        <!-- Mensagem de Sem Cartas para Revisar -->
+        <div id="no-cards-review" class="d-none text-center py-5">
+          <i class="bi bi-calendar-check text-muted" style="font-size: 4rem;"></i>
+          <h3 class="mt-3">Nenhuma carta para revisar</h3>
+          <p class="text-muted" id="next-review-info">Todas as cartas estão agendadas para mais tarde.</p>
+          <button class="btn btn-minimal mt-3" id="btnVoltarSemCartas">
+            <i class="bi bi-arrow-left"></i> Voltar aos Decks
+          </button>
+        </div>
+      </div>
+
+      <!-- Página de Gerenciamento de Cartas -->
+      <div class="page d-none" id="page-manage-cards">
+        <div class="d-flex align-items-center mb-3">
+          <button class="btn btn-link p-0 me-3" id="btnVoltarDecks">
+            <i class="bi bi-arrow-left fs-4"></i>
+          </button>
+          <div class="flex-grow-1">
+            <h2 id="cards-deck-name" class="mb-0"><i class="bi bi-card-text"></i> <span></span></h2>
+            <p class="subtitle mb-0" id="cards-count">0 cartas</p>
+          </div>
+        </div>
+
+        <!-- Formulário para adicionar/editar carta -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title" id="form-card-title">Adicionar Carta</h5>
+            <input type="hidden" id="edit-card-id">
+            <div class="mb-3">
+              <label for="card-front" class="form-label">Frente (Pergunta)</label>
+              <textarea class="form-control" id="card-front" rows="2" placeholder="Digite a pergunta..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="card-back" class="form-label">Traseira (Resposta)</label>
+              <textarea class="form-control" id="card-back" rows="2" placeholder="Digite a resposta..."></textarea>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted" id="card-author-info"></small>
+              <div>
+                <button class="btn btn-outline-secondary btn-sm me-2 d-none" id="btnCancelarEdicao">Cancelar</button>
+                <button class="btn btn-minimal" id="btnSalvarCarta">
+                  <i class="bi bi-check"></i> Salvar Carta
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de Cartas -->
+        <div id="cards-container">
+          <!-- Cartas serão renderizadas aqui via JavaScript -->
+        </div>
+
+        <!-- Mensagem quando não há cartas -->
+        <div id="empty-cards" class="card d-none">
+          <div class="card-body text-center">
+            <p class="empty-text mb-0">Nenhuma carta neste deck ainda.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Página Configurações -->
+      <div class="page d-none" id="page-configuracoes">
+        <h2><i class="bi bi-gear"></i> Configurações</h2>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Perfil</h5>
+            <div class="mb-3">
+              <label for="authorName" class="form-label">Nome do Autor</label>
+              <input type="text" class="form-control" id="authorName" placeholder="Seu nome (aparecerá nas cartas)">
+              <small class="text-muted">Este nome será usado automaticamente ao criar novas cartas.</small>
+            </div>
+            <hr>
+            <h5 class="card-title">Aparência</h5>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="darkMode">
+              <label class="form-check-label" for="darkMode">Modo Escuro</label>
+            </div>
+            <hr>
+            <h5 class="card-title">Notificações</h5>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="notifications" checked>
+              <label class="form-check-label" for="notifications">Ativar Notificações</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Novo Deck -->
+  <div class="modal fade" id="modalNovoDeck" tabindex="-1" aria-labelledby="modalNovoDeckLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="modalNovoDeckLabel">Novo Deck</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="deckName" class="form-label">Nome do Deck</label>
+            <input type="text" class="form-control" id="deckName" placeholder="Ex: Inglês - Vocabulário">
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-minimal" id="btnCriarDeck">
+            <i class="bi bi-plus"></i> Criar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Renomear Deck -->
+  <div class="modal fade" id="modalRenomearDeck" tabindex="-1" aria-labelledby="modalRenomearDeckLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="modalRenomearDeckLabel">Renomear Deck</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="renameDeckId">
+          <div class="mb-3">
+            <label for="newDeckName" class="form-label">Novo Nome</label>
+            <input type="text" class="form-control" id="newDeckName" placeholder="Digite o novo nome">
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-minimal" id="btnConfirmarRenomear">
+            <i class="bi bi-check"></i> Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Confirmar Exclusão -->
+  <div class="modal fade" id="modalExcluirDeck" tabindex="-1" aria-labelledby="modalExcluirDeckLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="modalExcluirDeckLabel">Excluir Deck</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="deleteDeckId">
+          <p>Tem certeza que deseja excluir o deck "<strong id="deleteDeckName"></strong>"?</p>
+          <p class="text-muted small">Esta ação não pode ser desfeita. Todas as cartas do deck serão perdidas.</p>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="btnConfirmarExcluir">
+            <i class="bi bi-trash"></i> Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer mt-auto py-3 bg-light fixed-bottom">
+    <div class="container text-center">
+      <span class="text-muted">© 2024 Deflash Decks</span>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS (local) -->
+  <script src="lib/bootstrap.bundle.min.js"></script>
+  <!-- Custom JS -->
+  <script src="app.js"></script>
+</body>
+</html>

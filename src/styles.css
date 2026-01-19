@@ -1,0 +1,644 @@
+/* Estilos Minimalistas - Deflash Decks */
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #e9ecef;
+  --accent-color: #212529;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 60px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+main {
+  flex: 1;
+}
+
+/* Navbar minimalista */
+.navbar {
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--text-primary) !important;
+}
+
+.navbar-brand i {
+  margin-right: 6px;
+}
+
+.nav-link {
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--text-primary) !important;
+}
+
+/* Títulos */
+h2 {
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.empty-text {
+  color: var(--text-secondary);
+}
+
+/* Cards minimalistas */
+.card {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: none;
+  background-color: var(--bg-primary);
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Botões minimalistas */
+.btn-minimal {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.btn-minimal:hover {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+  opacity: 0.8;
+}
+
+/* Form controls */
+.form-check-input:checked {
+  background-color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.form-control {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.form-control:focus {
+  border-color: var(--text-secondary);
+  box-shadow: none;
+}
+
+/* Animação de página */
+.page {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Footer */
+.footer {
+  background-color: var(--bg-secondary) !important;
+  border-top: 1px solid var(--border-color);
+}
+
+.footer span {
+  font-size: 0.85rem;
+}
+
+/* ==================== DECK CARDS ==================== */
+
+.deck-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 140px;
+}
+
+.deck-card .card-body {
+  padding: 1.5rem;
+}
+
+.deck-card .card-title {
+  font-size: 1.3rem;
+}
+
+.deck-card .text-muted.small {
+  font-size: 1rem !important;
+}
+
+.deck-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.deck-info {
+  flex: 1;
+  padding-right: 10px;
+}
+
+.deck-info:hover h5 {
+  color: var(--text-secondary);
+}
+
+/* ==================== DROPDOWN (TRÊS PONTOS) ==================== */
+
+.dropdown-menu {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+.dropdown-item i {
+  width: 16px;
+}
+
+.dropdown-divider {
+  margin: 0.25rem 0;
+  border-color: var(--border-color);
+}
+
+/* ==================== PÁGINA DE CARTAS ==================== */
+
+#btnVoltarDecks {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+#btnVoltarDecks:hover {
+  color: var(--text-secondary);
+}
+
+.card-item {
+  transition: transform 0.2s ease;
+}
+
+.card-item:hover {
+  transform: translateX(4px);
+}
+
+.card-front {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.card-back {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-actions .btn {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.card-item:hover .card-actions .btn {
+  opacity: 1;
+}
+
+/* ==================== MODAL MINIMALISTA ==================== */
+
+.modal-content {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.modal-header {
+  padding: 1.25rem 1.5rem 0.5rem;
+}
+
+.modal-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.modal-body {
+  padding: 1rem 1.5rem;
+}
+
+.modal-footer {
+  padding: 0.5rem 1.5rem 1.25rem;
+}
+
+.btn-close:focus {
+  box-shadow: none;
+}
+
+/* ==================== MODO ESCURO ==================== */
+
+body.dark-mode {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #2a2a2a;
+  --accent-color: #e0e0e0;
+}
+
+body.dark-mode .navbar {
+  background-color: var(--bg-secondary) !important;
+  border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .navbar-brand {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .nav-link {
+  color: var(--text-secondary) !important;
+}
+
+body.dark-mode .nav-link:hover,
+body.dark-mode .nav-link.active {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .card {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .subtitle,
+body.dark-mode .empty-text {
+  color: var(--text-secondary);
+}
+
+body.dark-mode .btn-minimal {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+body.dark-mode .form-control {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .form-check-label {
+  color: var(--text-primary);
+}
+
+body.dark-mode .footer {
+  background-color: var(--bg-secondary) !important;
+  border-top-color: var(--border-color);
+}
+
+body.dark-mode .footer span {
+  color: var(--text-secondary) !important;
+}
+
+body.dark-mode h2,
+body.dark-mode h5,
+body.dark-mode .card-title {
+  color: var(--text-primary);
+}
+
+/* Dark mode - Dropdown */
+body.dark-mode .dropdown-menu {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .dropdown-item {
+  color: var(--text-primary);
+}
+
+body.dark-mode .dropdown-item:hover {
+  background-color: #2a2a2a;
+}
+
+body.dark-mode .dropdown-divider {
+  border-color: var(--border-color);
+}
+
+/* Dark mode - Modal */
+body.dark-mode .modal-content {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+body.dark-mode .btn-close {
+  filter: invert(1);
+}
+
+body.dark-mode .btn-outline-secondary {
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .btn-outline-secondary:hover {
+  background-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* Dark mode - Deck cards */
+body.dark-mode .deck-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode - Botão voltar */
+body.dark-mode #btnVoltarDecks {
+  color: var(--text-primary);
+}
+
+body.dark-mode #btnVoltarDecks:hover {
+  color: var(--text-secondary);
+}
+
+/* Dark mode - Card actions */
+body.dark-mode .card-actions .btn.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+body.dark-mode .card-actions .btn.text-danger {
+  color: #dc3545 !important;
+}
+
+/* Dark mode - Labels */
+body.dark-mode .form-label {
+  color: var(--text-primary);
+}
+
+body.dark-mode .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* ==================== PÁGINA DE REVISÃO ==================== */
+
+#btnVoltarReview {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+#btnVoltarReview:hover {
+  color: var(--text-secondary);
+}
+
+.review-card-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.review-card {
+  width: 100%;
+  max-width: 600px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.review-card .card-body {
+  width: 100%;
+  padding: 2rem;
+}
+
+.review-content {
+  width: 100%;
+}
+
+.review-text {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+#review-back .review-text {
+  font-size: 1.1rem;
+}
+
+/* Botões de Dificuldade */
+.btn-difficulty {
+  padding: 1rem 0.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid;
+}
+
+.btn-difficulty:hover {
+  transform: translateY(-2px);
+}
+
+.btn-difficulty i {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.btn-difficulty .btn-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.btn-difficulty .btn-interval {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 0.25rem;
+}
+
+/* Cores dos botões de dificuldade */
+.btn-again {
+  background-color: #fff5f5;
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-again:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-hard {
+  background-color: #fff8f0;
+  border-color: #fd7e14;
+  color: #fd7e14;
+}
+
+.btn-hard:hover {
+  background-color: #fd7e14;
+  color: white;
+}
+
+.btn-medium {
+  background-color: #f0f7ff;
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+
+.btn-medium:hover {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.btn-easy {
+  background-color: #f0fff4;
+  border-color: #198754;
+  color: #198754;
+}
+
+.btn-easy:hover {
+  background-color: #198754;
+  color: white;
+}
+
+/* Badge de revisão */
+.badge.bg-primary {
+  font-weight: 500;
+  font-size: 0.7rem;
+}
+
+/* Dark mode - Página de revisão */
+body.dark-mode #btnVoltarReview {
+  color: var(--text-primary);
+}
+
+body.dark-mode #btnVoltarReview:hover {
+  color: var(--text-secondary);
+}
+
+body.dark-mode .review-card {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .review-text {
+  color: var(--text-primary);
+}
+
+body.dark-mode #review-back .review-text {
+  color: var(--text-secondary);
+}
+
+/* Dark mode - Botões de dificuldade */
+body.dark-mode .btn-again {
+  background-color: rgba(220, 53, 69, 0.15);
+  border-color: #dc3545;
+  color: #ff6b7a;
+}
+
+body.dark-mode .btn-again:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+body.dark-mode .btn-hard {
+  background-color: rgba(253, 126, 20, 0.15);
+  border-color: #fd7e14;
+  color: #ffaa5c;
+}
+
+body.dark-mode .btn-hard:hover {
+  background-color: #fd7e14;
+  color: white;
+}
+
+body.dark-mode .btn-medium {
+  background-color: rgba(13, 110, 253, 0.15);
+  border-color: #0d6efd;
+  color: #6ea8fe;
+}
+
+body.dark-mode .btn-medium:hover {
+  background-color: #0d6efd;
+  color: white;
+}
+
+body.dark-mode .btn-easy {
+  background-color: rgba(25, 135, 84, 0.15);
+  border-color: #198754;
+  color: #75b798;
+}
+
+body.dark-mode .btn-easy:hover {
+  background-color: #198754;
+  color: white;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  .deck-card .card-body {
+    padding: 0.875rem;
+  }
+
+  .card-actions {
+    flex-direction: row;
+  }
+
+  .review-text {
+    font-size: 1.1rem;
+  }
+
+  #review-back .review-text {
+    font-size: 1rem;
+  }
+
+  .btn-difficulty {
+    padding: 0.75rem 0.25rem;
+  }
+
+  .btn-difficulty i {
+    font-size: 1.25rem;
+  }
+
+  .btn-difficulty .btn-label {
+    font-size: 0.8rem;
+  }
+
+  .btn-difficulty .btn-interval {
+    font-size: 0.65rem;
+  }
+}

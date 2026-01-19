@@ -1,0 +1,27 @@
+{
+  "name": "deflash-decks",
+  "version": "1.0.0",
+  "description": "Deflash Decks - Gerenciador de Decks",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.deflash.decks",
+    "productName": "Deflash Decks",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  }
+}
