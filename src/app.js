@@ -514,6 +514,12 @@ function renderDecks() {
                 <li><a class="dropdown-item" href="#" onclick="openManageCards('${deck.id}'); return false;">
                   <i class="bi bi-card-list me-2"></i>Gerenciar Cartas
                 </a></li>
+                <li><a class="dropdown-item" href="#" onclick="openExportModal('${deck.id}'); return false;">
+                  <i class="bi bi-download me-2"></i>Exportar Cards
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="triggerImport('${deck.id}'); return false;">
+                  <i class="bi bi-upload me-2"></i>Importar Cards
+                </a></li>
                 <li><a class="dropdown-item" href="#" onclick="openRenameModal('${deck.id}'); return false;">
                   <i class="bi bi-pencil me-2"></i>Renomear
                 </a></li>
@@ -854,6 +860,198 @@ function openDeleteModal(deckId) {
   modal.show();
 }
 
+// Abre modal de exportar cards
+function openExportModal(deckId) {
+  const deck = getDeckById(deckId);
+  if (!deck) return;
+
+  document.getElementById('exportDeckId').value = deckId;
+  document.getElementById('exportDeckName').textContent = deck.name;
+  document.getElementById('exportWithoutProgress').checked = true;
+
+  const modal = new bootstrap.Modal(document.getElementById('modalExportarCards'));
+  modal.show();
+}
+
+// Exporta cards do deck para arquivo JSON
+function exportDeckCards(deckId, includeProgress) {
+  const deck = getDeckById(deckId);
+  if (!deck) return;
+
+  const exportData = {
+    deckName: deck.name,
+    exportedAt: new Date().toISOString(),
+    includesProgress: includeProgress,
+    cards: deck.cards.map(card => {
+      if (includeProgress) {
+        return {
+          front: card.front,
+          back: card.back,
+          author: card.author,
+          createdAt: card.createdAt,
+          nextReview: card.nextReview,
+          easeFactor: card.easeFactor,
+          lastReview: card.lastReview
+        };
+      } else {
+        return {
+          front: card.front,
+          back: card.back,
+          author: card.author,
+          createdAt: card.createdAt,
+          nextReview: null,
+          easeFactor: 0,
+          lastReview: null
+        };
+      }
+    })
+  };
+
+  // Cria o arquivo e faz download
+  const jsonString = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${deck.name.replace(/[^a-zA-Z0-9]/g, '_')}_cards.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ==================== IMPORTAÇÃO DE CARDS ====================
+
+// Gera hash MD5 baseado apenas no conteúdo (front + back)
+function getCardContentHash(front, back) {
+  return md5(front.trim().toLowerCase() + back.trim().toLowerCase());
+}
+
+// Variável para armazenar o deck alvo da importação
+let importTargetDeckId = null;
+
+// Abre o seletor de arquivo para importação
+function triggerImport(deckId) {
+  importTargetDeckId = deckId;
+  const fileInput = document.getElementById('importFileInput');
+  fileInput.value = ''; // Limpa seleção anterior
+  fileInput.click();
+}
+
+// Processa o arquivo de importação
+function processImportFile(file) {
+  if (!importTargetDeckId) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importData = JSON.parse(e.target.result);
+
+      // Valida estrutura do arquivo
+      if (!importData.cards || !Array.isArray(importData.cards)) {
+        showImportResult('error', 'Arquivo inválido. Estrutura de cards não encontrada.');
+        return;
+      }
+
+      // Obtém o deck atual
+      const decks = loadDecks();
+      const deck = decks.find(d => d.id === importTargetDeckId);
+      if (!deck) {
+        showImportResult('error', 'Deck não encontrado.');
+        return;
+      }
+
+      // Cria set de hashes dos cards existentes no deck
+      const existingHashes = new Set();
+      deck.cards.forEach(card => {
+        existingHashes.add(getCardContentHash(card.front, card.back));
+      });
+
+      // Filtra cards novos (não duplicados)
+      const settings = loadSettings();
+      let importedCount = 0;
+      let duplicateCount = 0;
+
+      importData.cards.forEach(importCard => {
+        // Valida campos obrigatórios
+        if (!importCard.front || !importCard.back) {
+          return;
+        }
+
+        const contentHash = getCardContentHash(importCard.front, importCard.back);
+
+        // Verifica se já existe
+        if (existingHashes.has(contentHash)) {
+          duplicateCount++;
+          return;
+        }
+
+        // Card é novo, adiciona ao deck
+        const createdAt = importCard.createdAt || new Date().toISOString();
+        const newCard = {
+          id: generateCardId(importCard.front, importCard.back, createdAt),
+          front: importCard.front.trim(),
+          back: importCard.back.trim(),
+          author: importCard.author || settings.authorName || 'Importado',
+          createdAt: createdAt,
+          // Usa os valores do arquivo se existirem, senão usa padrão
+          nextReview: importCard.nextReview || null,
+          easeFactor: importCard.easeFactor || 0,
+          lastReview: importCard.lastReview || null
+        };
+
+        deck.cards.push(newCard);
+        existingHashes.add(contentHash); // Evita duplicatas dentro do próprio arquivo
+        importedCount++;
+      });
+
+      // Salva as alterações
+      saveDecks(decks);
+
+      // Mostra resultado
+      showImportResult('success', null, importedCount, duplicateCount, importData.cards.length);
+
+      // Atualiza a lista de decks
+      renderDecks();
+
+    } catch (err) {
+      showImportResult('error', 'Erro ao ler o arquivo: ' + err.message);
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+// Mostra o modal com resultado da importação
+function showImportResult(type, errorMessage, imported, duplicates, total) {
+  const content = document.getElementById('importResultContent');
+
+  if (type === 'error') {
+    content.innerHTML = `
+      <div class="text-center">
+        <i class="bi bi-x-circle text-danger" style="font-size: 3rem;"></i>
+        <p class="mt-3 mb-0">${errorMessage}</p>
+      </div>
+    `;
+  } else {
+    content.innerHTML = `
+      <div class="text-center">
+        <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+        <h5 class="mt-3">Importação Concluída</h5>
+      </div>
+      <div class="mt-3">
+        <p class="mb-2"><i class="bi bi-file-earmark-text me-2"></i>Total no arquivo: <strong>${total}</strong> cards</p>
+        <p class="mb-2 text-success"><i class="bi bi-plus-circle me-2"></i>Importados: <strong>${imported}</strong> cards novos</p>
+        <p class="mb-0 text-muted"><i class="bi bi-copy me-2"></i>Ignorados (duplicados): <strong>${duplicates}</strong> cards</p>
+      </div>
+    `;
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('modalImportResult'));
+  modal.show();
+}
+
 // ==================== INICIALIZAÇÃO ====================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -988,6 +1186,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Atualiza a lista
       renderDecks();
+    });
+  }
+
+  // Confirmar exportação de cards
+  const btnConfirmarExportar = document.getElementById('btnConfirmarExportar');
+  if (btnConfirmarExportar) {
+    btnConfirmarExportar.addEventListener('click', () => {
+      const deckId = document.getElementById('exportDeckId').value;
+      const includeProgress = document.getElementById('exportWithProgress').checked;
+
+      exportDeckCards(deckId, includeProgress);
+
+      // Fecha o modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalExportarCards'));
+      modal.hide();
+    });
+  }
+
+  // Input de arquivo para importação
+  const importFileInput = document.getElementById('importFileInput');
+  if (importFileInput) {
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        processImportFile(file);
+      }
     });
   }
 

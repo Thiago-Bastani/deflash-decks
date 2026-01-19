@@ -309,6 +309,64 @@
     </div>
   </div>
 
+  <!-- Modal Exportar Cards -->
+  <div class="modal fade" id="modalExportarCards" tabindex="-1" aria-labelledby="modalExportarCardsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="modalExportarCardsLabel">Exportar Cards</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="exportDeckId">
+          <p>Exportar cards do deck "<strong id="exportDeckName"></strong>"</p>
+          <p class="text-muted small">Deseja incluir as datas e progresso de revisão na exportação?</p>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="exportOption" id="exportWithProgress" value="with">
+            <label class="form-check-label" for="exportWithProgress">
+              Sim, incluir progresso de revisão
+              <small class="text-muted d-block">Inclui easeFactor, nextReview e lastReview</small>
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="exportOption" id="exportWithoutProgress" value="without" checked>
+            <label class="form-check-label" for="exportWithoutProgress">
+              Não, exportar apenas o conteúdo
+              <small class="text-muted d-block">Cards serão tratados como novos ao importar</small>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-minimal" id="btnConfirmarExportar">
+            <i class="bi bi-download"></i> Exportar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input oculto para importação -->
+  <input type="file" id="importFileInput" accept=".json" style="display: none;">
+
+  <!-- Modal Resultado Importação -->
+  <div class="modal fade" id="modalImportResult" tabindex="-1" aria-labelledby="modalImportResultLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="modalImportResultLabel">Resultado da Importação</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div id="importResultContent"></div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-minimal" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="footer mt-auto py-3 bg-light fixed-bottom">
     <div class="container text-center">
